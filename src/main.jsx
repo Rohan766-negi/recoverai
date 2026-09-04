@@ -157,7 +157,7 @@ const RiskBadge = ({ level }) => {
     <span
       className={`inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full border whitespace-nowrap ${
         styles[level] ||
-        'bg-slate-800 text-slate-300 border-slate-700'
+        'bg-[#172A3D] text-slate-300 border-[#31506B]'
       }`}
     >
       {level || 'UNKNOWN'}
@@ -180,17 +180,17 @@ const StatusBadge = ({ status }) => {
       'bg-red-950 text-red-400 border-red-800',
 
     PENDING:
-      'bg-slate-800 text-slate-400 border-slate-700',
+      'bg-[#172A3D] text-slate-400 border-[#31506B]',
 
     PROCESSING:
-      'bg-indigo-900/40 text-indigo-300 border-indigo-700/60 animate-pulse'
+      'bg-blue-900/40 text-blue-300 border-blue-700/60 animate-pulse'
   };
 
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 text-[11px] font-mono rounded border whitespace-nowrap ${
         styles[status] ||
-        'bg-slate-800 text-slate-300 border-slate-700'
+        'bg-[#172A3D] text-slate-300 border-[#31506B]'
       }`}
     >
       {status}
@@ -438,6 +438,42 @@ export default function App() {
   /*
    * Real evaluation API.
    */
+
+  const runRecovery = async () => {
+  if (!selectedTxn?.id) return;
+
+  try {
+    setActionLoading(true);
+
+    const res = await fetch('/api/recovery/execute', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': `recovery_${selectedTxn.id}`
+      },
+      body: JSON.stringify({
+        transactionId: selectedTxn.id,
+        seed: 424242
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || `Recovery failed: ${res.status}`);
+    }
+
+    await fetchData();
+    setActiveTab('transactions');
+
+  } catch (error) {
+    console.error('Recovery execution failed:', error);
+    alert(error.message);
+  } finally {
+    setActionLoading(false);
+  }
+};
+
   const runEvaluation = async () => {
     try {
       setEvalRunning(true);
@@ -572,8 +608,8 @@ export default function App() {
         }}
         className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
           activeTab === 'transactions'
-            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-            : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+            : 'text-slate-400 hover:bg-[#172A3D]/60 hover:text-slate-200'
         }`}
       >
         <Activity className="w-4 h-4 shrink-0" />
@@ -591,8 +627,8 @@ export default function App() {
         }}
         className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
           activeTab === 'evaluation'
-            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-            : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+            : 'text-slate-400 hover:bg-[#172A3D]/60 hover:text-slate-200'
         }`}
       >
         <BarChart3 className="w-4 h-4 shrink-0" />
@@ -606,8 +642,8 @@ export default function App() {
         }}
         className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
           activeTab === 'audit'
-            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-            : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+            : 'text-slate-400 hover:bg-[#172A3D]/60 hover:text-slate-200'
         }`}
       >
         <ShieldCheck className="w-4 h-4 shrink-0" />
@@ -617,13 +653,13 @@ export default function App() {
   );
 
   return (
-    <div className="flex h-screen w-screen bg-slate-950 text-slate-100 font-sans overflow-hidden">
+    <div className="flex h-screen w-screen bg-[#07111F] text-[#F8FAFC] font-sans overflow-hidden">
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-slate-900 border-r border-slate-800 flex-col justify-between shrink-0">
+      <aside className="hidden lg:flex w-64 bg-[#0D1B2A] border-r border-[#243B53] flex-col justify-between shrink-0">
         <div>
-          <div className="px-6 py-5 border-b border-slate-800 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/30 shrink-0">
+          <div className="px-6 py-5 border-b border-[#243B53] flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-600/30 shrink-0">
               R
             </div>
 
@@ -632,7 +668,7 @@ export default function App() {
                 RecoverAI
               </span>
 
-              <span className="text-[10px] text-indigo-400 font-mono tracking-wider uppercase block">
+              <span className="text-[10px] text-blue-400 font-mono tracking-wider uppercase block">
                 Revenue Agent
               </span>
             </div>
@@ -643,9 +679,9 @@ export default function App() {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-slate-800/80 bg-slate-900/50">
-          <div className="rounded-lg bg-slate-950 p-3 border border-slate-800 text-xs">
-            <div className="flex items-center gap-1.5 text-indigo-400 font-semibold mb-1">
+        <div className="p-4 border-t border-[#243B53]/80 bg-[#0D1B2A]/50">
+          <div className="rounded-lg bg-[#07111F] p-3 border border-[#243B53] text-xs">
+            <div className="flex items-center gap-1.5 text-blue-400 font-semibold mb-1">
               <Lock className="w-3.5 h-3.5 shrink-0" />
               Safety Architecture
             </div>
@@ -669,17 +705,17 @@ export default function App() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#07111F]/80 backdrop-blur-sm"
             onClick={() =>
               setMobileMenuOpen(false)
             }
           />
 
-          <div className="relative w-4/5 max-w-xs bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between z-10 shadow-2xl">
+          <div className="relative w-4/5 max-w-xs bg-[#0D1B2A] border-r border-[#243B53] p-5 flex flex-col justify-between z-10 shadow-2xl">
             <div>
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+              <div className="flex items-center justify-between pb-4 border-b border-[#243B53] mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
                     R
                   </div>
 
@@ -688,7 +724,7 @@ export default function App() {
                       RecoverAI
                     </span>
 
-                    <span className="text-[10px] text-indigo-400 font-mono uppercase block">
+                    <span className="text-[10px] text-blue-400 font-mono uppercase block">
                       Revenue Agent
                     </span>
                   </div>
@@ -698,7 +734,7 @@ export default function App() {
                   onClick={() =>
                     setMobileMenuOpen(false)
                   }
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#172A3D]"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -709,8 +745,8 @@ export default function App() {
               </nav>
             </div>
 
-            <div className="rounded-lg bg-slate-950 p-3 border border-slate-800 text-xs">
-              <div className="flex items-center gap-1.5 text-indigo-400 font-semibold mb-1">
+            <div className="rounded-lg bg-[#07111F] p-3 border border-[#243B53] text-xs">
+              <div className="flex items-center gap-1.5 text-blue-400 font-semibold mb-1">
                 <Lock className="w-3.5 h-3.5 shrink-0" />
                 Safety Protocol
               </div>
@@ -727,13 +763,13 @@ export default function App() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Header */}
-        <header className="min-h-16 border-b border-slate-800 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between bg-slate-900/60 shrink-0 gap-3">
+        <header className="min-h-16 border-b border-[#243B53] px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between bg-[#0D1B2A]/60 shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() =>
                 setMobileMenuOpen(true)
               }
-              className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 shrink-0"
+              className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-[#172A3D] shrink-0"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -765,7 +801,7 @@ export default function App() {
             <button
               onClick={fetchData}
               disabled={loading}
-              className="px-2.5 sm:px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md border border-slate-700 flex items-center gap-1.5 sm:gap-2 transition shrink-0"
+              className="px-2.5 sm:px-3 py-1.5 text-xs font-medium bg-[#172A3D] hover:bg-slate-700 text-slate-200 rounded-md border border-[#31506B] flex items-center gap-1.5 sm:gap-2 transition shrink-0"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${
@@ -786,7 +822,7 @@ export default function App() {
           {/* KPI Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
 
-            <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-xl shadow-sm">
+            <div className="bg-[#0D1B2A] border border-[#243B53] p-3.5 sm:p-4 rounded-xl shadow-sm">
               <span className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">
                 Revenue At Risk
               </span>
@@ -796,7 +832,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-xl shadow-sm">
+            <div className="bg-[#0D1B2A] border border-[#243B53] p-3.5 sm:p-4 rounded-xl shadow-sm">
               <span className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">
                 Recovered
               </span>
@@ -806,17 +842,17 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-xl shadow-sm">
+            <div className="bg-[#0D1B2A] border border-[#243B53] p-3.5 sm:p-4 rounded-xl shadow-sm">
               <span className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">
                 Recovery Rate
               </span>
 
-              <div className="text-base sm:text-xl font-bold text-indigo-400 font-mono truncate">
+              <div className="text-base sm:text-xl font-bold text-blue-400 font-mono truncate">
                 {formatPercent(kpi.rate)}
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-xl shadow-sm">
+            <div className="bg-[#0D1B2A] border border-[#243B53] p-3.5 sm:p-4 rounded-xl shadow-sm">
               <span className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">
                 Policy Blocks
               </span>
@@ -826,7 +862,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-xl shadow-sm">
+            <div className="bg-[#0D1B2A] border border-[#243B53] p-3.5 sm:p-4 rounded-xl shadow-sm">
               <span className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">
                 Escalations
               </span>
@@ -836,7 +872,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-xl shadow-sm">
+            <div className="bg-[#0D1B2A] border border-[#243B53] p-3.5 sm:p-4 rounded-xl shadow-sm">
               <span className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">
                 AI Confidence
               </span>
@@ -854,9 +890,9 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
               {/* Transaction Table */}
-              <div className="col-span-1 lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm flex flex-col min-w-0">
+              <div className="col-span-1 lg:col-span-7 bg-[#0D1B2A] border border-[#243B53] rounded-xl overflow-hidden shadow-sm flex flex-col min-w-0">
 
-                <div className="p-3 sm:p-4 border-b border-slate-800 bg-slate-900/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+                <div className="p-3 sm:p-4 border-b border-[#243B53] bg-[#0D1B2A]/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
 
                   <div className="relative flex-1 min-w-0">
                     <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500 pointer-events-none" />
@@ -868,7 +904,7 @@ export default function App() {
                       onChange={(e) =>
                         setSearchQuery(e.target.value)
                       }
-                      className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#07111F] border border-[#243B53] rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
@@ -879,7 +915,7 @@ export default function App() {
                       onChange={(e) =>
                         setFilterRisk(e.target.value)
                       }
-                      className="flex-1 sm:flex-none bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
+                      className="flex-1 sm:flex-none bg-[#07111F] border border-[#243B53] rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500"
                     >
                       <option value="ALL">
                         All Risks
@@ -907,7 +943,7 @@ export default function App() {
                       onChange={(e) =>
                         setFilterStatus(e.target.value)
                       }
-                      className="flex-1 sm:flex-none bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
+                      className="flex-1 sm:flex-none bg-[#07111F] border border-[#243B53] rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500"
                     >
                       <option value="ALL">
                         All Statuses
@@ -931,7 +967,7 @@ export default function App() {
                 <div className="overflow-x-auto w-full">
                   <table className="w-full min-w-[560px] text-left text-xs text-slate-300">
 
-                    <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                    <thead className="bg-[#07111F] text-slate-400 uppercase tracking-wider font-semibold border-b border-[#243B53]">
                       <tr>
                         <th className="py-3 px-4">
                           Transaction ID
@@ -969,8 +1005,8 @@ export default function App() {
                           }
                           className={`cursor-pointer transition-colors ${
                             selectedTxn?.id === t.id
-                              ? 'bg-indigo-950/40 border-l-2 border-indigo-500'
-                              : 'hover:bg-slate-800/40'
+                              ? 'bg-blue-950/40 border-l-2 border-indigo-500'
+                              : 'hover:bg-[#172A3D]/40'
                           }`}
                         >
 
@@ -1027,9 +1063,9 @@ export default function App() {
 
                 {selectedTxn ? (
                   <>
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
+                    <div className="bg-[#0D1B2A] border border-[#243B53] rounded-xl p-4 sm:p-6 shadow-sm">
 
-                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 sm:pb-4 mb-4 border-b border-slate-800">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 sm:pb-4 mb-4 border-b border-[#243B53]">
 
                         <div>
                           <span className="text-[10px] sm:text-xs text-slate-400 font-mono block">
@@ -1091,7 +1127,7 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/80 text-xs">
+                      <div className="bg-[#07111F] p-3 rounded-lg border border-[#243B53]/80 text-xs">
 
                         <span className="text-slate-500 text-[10px] sm:text-[11px] block font-mono mb-1">
                           GATEWAY ERROR DESCRIPTION
@@ -1104,12 +1140,12 @@ export default function App() {
                     </div>
 
                     {/* Pipeline */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
+                    <div className="bg-[#0D1B2A] border border-[#243B53] rounded-xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
 
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <div className="flex items-center justify-between border-b border-[#243B53] pb-3">
 
                         <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                          <Layers className="w-4 h-4 text-indigo-400 shrink-0" />
+                          <Layers className="w-4 h-4 text-blue-400 shrink-0" />
                           Recovery Lifecycle Pipeline
                         </h4>
 
@@ -1121,7 +1157,7 @@ export default function App() {
                       {/* Detection */}
                       <div className="flex gap-3 text-xs">
 
-                        <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 text-[11px] font-bold text-slate-300">
+                        <div className="w-6 h-6 rounded-full bg-[#172A3D] border border-[#31506B] flex items-center justify-center shrink-0 text-[11px] font-bold text-slate-300">
                           1
                         </div>
 
@@ -1144,15 +1180,15 @@ export default function App() {
                       {/* AI */}
                       <div className="flex gap-3 text-xs">
 
-                        <div className="w-6 h-6 rounded-full bg-indigo-950 border border-indigo-700 flex items-center justify-center shrink-0 text-[11px] font-bold text-indigo-400">
+                        <div className="w-6 h-6 rounded-full bg-blue-950 border border-blue-700 flex items-center justify-center shrink-0 text-[11px] font-bold text-blue-400">
                           2
                         </div>
 
-                        <div className="flex-1 min-w-0 bg-slate-950 p-3 rounded-lg border border-slate-800">
+                        <div className="flex-1 min-w-0 bg-[#07111F] p-3 rounded-lg border border-[#243B53]">
 
                           <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
 
-                            <span className="font-semibold text-indigo-400 flex items-center gap-1.5">
+                            <span className="font-semibold text-blue-400 flex items-center gap-1.5">
                               <Cpu className="w-3.5 h-3.5 shrink-0" />
                               AI Advisory Diagnosis
                             </span>
@@ -1191,7 +1227,7 @@ export default function App() {
                             </div>
                           </div>
 
-                          <p className="text-[11px] text-slate-300 italic border-t border-slate-800/80 pt-2 leading-relaxed">
+                          <p className="text-[11px] text-slate-300 italic border-t border-[#243B53]/80 pt-2 leading-relaxed">
                             {selectedTxn.aiDiagnosis?.reasoningSummary ||
                               'Run the recovery workflow to generate an AI diagnosis.'}
                           </p>
@@ -1205,7 +1241,7 @@ export default function App() {
                           3
                         </div>
 
-                        <div className="flex-1 min-w-0 bg-slate-950 p-3 rounded-lg border border-slate-800">
+                        <div className="flex-1 min-w-0 bg-[#07111F] p-3 rounded-lg border border-[#243B53]">
 
                           <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
 
@@ -1235,7 +1271,18 @@ export default function App() {
                           </p>
                         </div>
                       </div>
+        
 
+        <div className="flex justify-end">
+  <button
+    onClick={runRecovery}
+    disabled={actionLoading || selectedTxn?.status !== 'FAILED'}
+    className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white font-semibold px-4 py-2 rounded-lg text-xs flex items-center gap-2"
+  >
+    <Play className="w-3.5 h-3.5" />
+    {actionLoading ? 'Running Recovery...' : 'Run Recovery Workflow'}
+  </button>
+</div>
                       {/* Execution */}
                       <div className="flex gap-3 text-xs">
 
@@ -1243,7 +1290,7 @@ export default function App() {
                           4
                         </div>
 
-                        <div className="flex-1 min-w-0 bg-slate-950 p-3 rounded-lg border border-slate-800">
+                        <div className="flex-1 min-w-0 bg-[#07111F] p-3 rounded-lg border border-[#243B53]">
 
                           <span className="font-semibold text-emerald-400 flex items-center gap-1.5 mb-1">
                             <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
@@ -1261,7 +1308,7 @@ export default function App() {
                           </div>
 
                           {selectedTxn.recoveryResult?.paymentLink && (
-                            <div className="mt-2 pt-2 border-t border-slate-800/80">
+                            <div className="mt-2 pt-2 border-t border-[#243B53]/80">
 
                               <span className="text-[10px] text-slate-500 block font-mono mb-1">
                                 DYNAMIC PAYMENT LINK
@@ -1273,7 +1320,7 @@ export default function App() {
                                 }
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-[11px] text-indigo-400 underline break-all font-mono"
+                                className="text-[11px] text-blue-400 underline break-all font-mono"
                               >
                                 {
                                   selectedTxn.recoveryResult.paymentLink
@@ -1287,7 +1334,7 @@ export default function App() {
                     </div>
                   </>
                 ) : (
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center text-slate-500 text-xs">
+                  <div className="bg-[#0D1B2A] border border-[#243B53] rounded-xl p-8 text-center text-slate-500 text-xs">
                     Select a transaction from the table.
                   </div>
                 )}
@@ -1299,7 +1346,7 @@ export default function App() {
           {activeTab === 'evaluation' && (
             <div className="space-y-6">
 
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              <div className="bg-[#0D1B2A] border border-[#243B53] rounded-xl p-4 sm:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
 
                 <div>
                   <h3 className="text-sm font-semibold text-white">
@@ -1313,7 +1360,7 @@ export default function App() {
 
                 <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
 
-                  <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg p-1">
+                  <div className="flex items-center gap-1.5 bg-[#07111F] border border-[#243B53] rounded-lg p-1">
 
                     {[50, 500, 1000].map((size) => (
                       <button
@@ -1323,7 +1370,7 @@ export default function App() {
                         }
                         className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-md transition ${
                           evalBatchSize === size
-                            ? 'bg-indigo-600 text-white shadow'
+                            ? 'bg-blue-600 text-white shadow'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
                       >
@@ -1339,13 +1386,13 @@ export default function App() {
                       setEvalSeed(e.target.value)
                     }
                     placeholder="PRNG Seed"
-                    className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 w-32 sm:w-36 focus:outline-none focus:border-indigo-500"
+                    className="bg-[#07111F] border border-[#243B53] rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 w-32 sm:w-36 focus:outline-none focus:border-blue-500"
                   />
 
                   <button
                     onClick={runEvaluation}
                     disabled={evalRunning}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3.5 sm:px-4 py-1.5 rounded-lg text-xs flex items-center gap-2 shadow-md shadow-indigo-600/20 whitespace-nowrap"
+                    className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3.5 sm:px-4 py-1.5 rounded-lg text-xs flex items-center gap-2 shadow-md shadow-blue-600/20 whitespace-nowrap"
                   >
                     <Play
                       className={`w-3.5 h-3.5 ${
@@ -1368,19 +1415,19 @@ export default function App() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
 
                     {/* RecoverAI */}
-                    <div className="bg-slate-900 border border-indigo-700/60 rounded-xl p-4 sm:p-6 shadow-md relative overflow-hidden">
+                    <div className="bg-[#0D1B2A] border border-blue-700/60 rounded-xl p-4 sm:p-6 shadow-md relative overflow-hidden">
 
-                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#243B53]">
 
                         <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
 
                           <h4 className="font-bold text-white text-sm">
                             RecoverAI Pipeline
                           </h4>
                         </div>
 
-                        <span className="text-[10px] sm:text-xs font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
+                        <span className="text-[10px] sm:text-xs font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">
                           AI-Diagnosed + Policy-Gated
                         </span>
                       </div>
@@ -1405,7 +1452,7 @@ export default function App() {
                             Net Recovery Rate
                           </span>
 
-                          <div className="text-xl sm:text-2xl font-bold text-indigo-400 font-mono mt-0.5 truncate">
+                          <div className="text-xl sm:text-2xl font-bold text-blue-400 font-mono mt-0.5 truncate">
                             {formatPercent(
                               evalMetrics.summary
                                 .recoveryRate
@@ -1444,9 +1491,9 @@ export default function App() {
                     </div>
 
                     {/* Baseline */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-md relative overflow-hidden">
+                    <div className="bg-[#0D1B2A] border border-[#243B53] rounded-xl p-4 sm:p-6 shadow-md relative overflow-hidden">
 
-                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#243B53]">
 
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
@@ -1456,7 +1503,7 @@ export default function App() {
                           </h4>
                         </div>
 
-                        <span className="text-[10px] sm:text-xs font-mono px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">
+                        <span className="text-[10px] sm:text-xs font-mono px-2 py-0.5 rounded bg-[#07111F] text-slate-400 border border-[#243B53]">
                           Deterministic Baseline
                         </span>
                       </div>
@@ -1481,7 +1528,7 @@ export default function App() {
                             Comparison
                           </span>
 
-                          <div className="text-xl sm:text-2xl font-bold text-indigo-400 font-mono mt-0.5 truncate">
+                          <div className="text-xl sm:text-2xl font-bold text-blue-400 font-mono mt-0.5 truncate">
                             +
                             {formatINR(
                               evalMetrics.summary
@@ -1492,7 +1539,7 @@ export default function App() {
                           </div>
                         </div>
 
-                        <div className="col-span-2 bg-slate-950 p-3 rounded-lg border border-slate-800/80 text-xs text-slate-400 leading-relaxed">
+                        <div className="col-span-2 bg-[#07111F] p-3 rounded-lg border border-[#243B53]/80 text-xs text-slate-400 leading-relaxed">
                           RecoverAI recovered{' '}
                           <span className="text-emerald-400 font-bold">
                             {formatINR(
@@ -1514,7 +1561,7 @@ export default function App() {
                   </div>
 
                   {/* Guardrail summary */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6">
+                  <div className="bg-[#0D1B2A] border border-[#243B53] rounded-xl p-4 sm:p-6">
 
                     <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-4">
                       Evaluation Guardrails
@@ -1522,7 +1569,7 @@ export default function App() {
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 
-                      <div className="bg-slate-950 border border-slate-800 rounded-lg p-3">
+                      <div className="bg-[#07111F] border border-[#243B53] rounded-lg p-3">
                         <span className="text-[10px] text-slate-500 block">
                           Batch
                         </span>
@@ -1532,7 +1579,7 @@ export default function App() {
                         </span>
                       </div>
 
-                      <div className="bg-slate-950 border border-slate-800 rounded-lg p-3">
+                      <div className="bg-[#07111F] border border-[#243B53] rounded-lg p-3">
                         <span className="text-[10px] text-slate-500 block">
                           Recovery Attempts
                         </span>
@@ -1545,7 +1592,7 @@ export default function App() {
                         </span>
                       </div>
 
-                      <div className="bg-slate-950 border border-slate-800 rounded-lg p-3">
+                      <div className="bg-[#07111F] border border-[#243B53] rounded-lg p-3">
                         <span className="text-[10px] text-slate-500 block">
                           Escalations
                         </span>
@@ -1558,7 +1605,7 @@ export default function App() {
                         </span>
                       </div>
 
-                      <div className="bg-slate-950 border border-slate-800 rounded-lg p-3">
+                      <div className="bg-[#07111F] border border-[#243B53] rounded-lg p-3">
                         <span className="text-[10px] text-slate-500 block">
                           Policy Blocks
                         </span>
@@ -1576,7 +1623,7 @@ export default function App() {
               )}
 
               {!evalMetrics && !evalRunning && (
-                <div className="bg-slate-900 border border-slate-800 rounded-xl p-10 text-center">
+                <div className="bg-[#0D1B2A] border border-[#243B53] rounded-xl p-10 text-center">
 
                   <BarChart3 className="w-8 h-8 text-slate-600 mx-auto mb-3" />
 
@@ -1590,9 +1637,9 @@ export default function App() {
 
           {/* AUDIT */}
           {activeTab === 'audit' && (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-[#0D1B2A] border border-[#243B53] rounded-xl overflow-hidden shadow-sm">
 
-              <div className="p-4 border-b border-slate-800 bg-slate-900/60 flex flex-wrap items-center justify-between gap-2">
+              <div className="p-4 border-b border-[#243B53] bg-[#0D1B2A]/60 flex flex-wrap items-center justify-between gap-2">
 
                 <div>
                   <h3 className="text-sm font-semibold text-white">
@@ -1616,7 +1663,7 @@ export default function App() {
 
                 <table className="w-full min-w-[620px] text-left text-xs text-slate-300">
 
-                  <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                  <thead className="bg-[#07111F] text-slate-400 uppercase tracking-wider font-semibold border-b border-[#243B53]">
 
                     <tr>
                       <th className="py-3 px-4">
@@ -1652,7 +1699,7 @@ export default function App() {
                         key={
                           log.eventId || idx
                         }
-                        className="hover:bg-slate-800/30"
+                        className="hover:bg-[#172A3D]/30"
                       >
 
                         <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
@@ -1663,7 +1710,7 @@ export default function App() {
                             : 'N/A'}
                         </td>
 
-                        <td className="py-3 px-4 text-indigo-300 font-semibold whitespace-nowrap">
+                        <td className="py-3 px-4 text-blue-300 font-semibold whitespace-nowrap">
                           {log.eventType ||
                             'EVENT'}
                         </td>
